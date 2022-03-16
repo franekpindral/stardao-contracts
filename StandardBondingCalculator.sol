@@ -275,11 +275,11 @@ contract TimeBondingCalculator is IBondingCalculator {
     using LowGasSafeMath for uint;
     using LowGasSafeMath for uint112;
 
-    IERC20 public immutable Time;
+    IERC20 public immutable Star;
 
-    constructor( address _Time ) {
-        require( _Time != address(0) );
-        Time = IERC20(_Time);
+    constructor( address _Star ) {
+        require( _Star != address(0) );
+        Star = IERC20(_Star);
     }
 
     function getKValue( address _pair ) public view returns( uint k_ ) {
@@ -315,12 +315,12 @@ contract TimeBondingCalculator is IBondingCalculator {
         ( uint reserve0, uint reserve1, ) = IUniswapV2Pair( _pair ).getReserves();
 
         uint reserve;
-        if ( IUniswapV2Pair( _pair ).token0() == address(Time) ) {
+        if ( IUniswapV2Pair( _pair ).token0() == address(Star) ) {
             reserve = reserve1;
         } else {
-            require(IUniswapV2Pair( _pair ).token1() == address(Time), "not a Time lp pair");
+            require(IUniswapV2Pair( _pair ).token1() == address(Star), "not a Star lp pair");
             reserve = reserve0;
         }
-        return reserve.mul( 2 * ( 10 ** Time.decimals() ) ).div( getTotalValue( _pair ) );
+        return reserve.mul( 2 * ( 10 ** Star.decimals() ) ).div( getTotalValue( _pair ) );
     }
 }

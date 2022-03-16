@@ -463,9 +463,9 @@ contract TimeBondDepository is Ownable {
 
 
     /* ======== STATE VARIABLES ======== */
-    IERC20 public immutable Time; // token given as payment for bond
+    IERC20 public immutable Star; // token given as payment for bond
     IWAVAX9 public immutable principle; // token used to create bond
-    ITreasury public immutable treasury; // mints Time when receives principle
+    ITreasury public immutable treasury; // mints Star when receives principle
     address public immutable DAO; // receives profit share from bond
 
     AggregatorV3Interface public priceFeed;
@@ -499,7 +499,7 @@ contract TimeBondDepository is Ownable {
 
     // Info for bond holder
     struct Bond {
-        uint payout; // Time remaining to be paid
+        uint payout; // STAR remaining to be paid
         uint pricePaid; // In DAI, for front end viewing
         uint32 vesting; // Seconds left to vest
         uint32 lastTime; // Last interaction
@@ -520,14 +520,14 @@ contract TimeBondDepository is Ownable {
     /* ======== INITIALIZATION ======== */
 
     constructor ( 
-        address _Time,
+        address _Star,
         address _principle,
         address _treasury, 
         address _DAO,
         address _feed
     ) {
         require( _Time != address(0) );
-        Time = IERC20(_Time);
+        Star = IERC20(_Star);
         require( _principle != address(0) );
         principle = IWAVAX9(_principle);
         require( _treasury != address(0) );
@@ -673,7 +673,7 @@ contract TimeBondDepository is Ownable {
         uint value = treasury.valueOf( address(principle), _amount );
         uint payout = payoutFor( value ); // payout to bonder is computed
 
-        require( payout >= 10000000, "Bond too small" ); // must be > 0.01 Time ( underflow protection )
+        require( payout >= 10000000, "Bond too small" ); // must be > 0.01 STAR ( underflow protection )
         require( payout <= maxPayout(), "Bond too large"); // size protection because there is no slippage
 
         /**
@@ -756,13 +756,13 @@ contract TimeBondDepository is Ownable {
      */
     function stakeOrSend( address _recipient, bool _stake, uint _amount ) internal returns ( uint ) {
         if ( !_stake ) { // if user does not want to stake
-            Time.transfer( _recipient, _amount ); // send payout
+            Star.transfer( _recipient, _amount ); // send payout
         } else { // if user wants to stake
             if ( useHelper ) { // use if staking warmup is 0
-                Time.approve( address(stakingHelper), _amount );
+                Star.approve( address(stakingHelper), _amount );
                 stakingHelper.stake( _amount, _recipient );
             } else {
-                Time.approve( address(staking), _amount );
+                Star.approve( address(staking), _amount );
                 staking.stake( _amount, _recipient );
             }
         }
@@ -810,7 +810,7 @@ contract TimeBondDepository is Ownable {
      *  @return uint
      */
     function maxPayout() public view returns ( uint ) {
-        return Time.totalSupply().mul( terms.maxPayout )/ 100000;
+        return Star.totalSupply().mul( terms.maxPayout )/ 100000;
     }
 
     /**
@@ -865,11 +865,11 @@ contract TimeBondDepository is Ownable {
 
 
     /**
-     *  @notice calculate current ratio of debt to Time supply
+     *  @notice calculate current ratio of debt to STAR supply
      *  @return debtRatio_ uint
      */
     function debtRatio() public view returns ( uint debtRatio_ ) {   
-        uint supply = Time.totalSupply();
+        uint supply = Star.totalSupply();
         debtRatio_ = FixedPoint.fraction( 
             currentDebt().mul( 1e9 ), 
             supply
@@ -948,7 +948,7 @@ contract TimeBondDepository is Ownable {
      *  @return bool
      */
     function recoverLostToken( IERC20 _token ) external returns ( bool ) {
-        require( _token != Time, "NAT" );
+        require( _token != Star, "NAT" );
         require( _token != principle, "NAP" );
         _token.safeTransfer( DAO, _token.balanceOf( address(this) ) );
         return true;

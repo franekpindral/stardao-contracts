@@ -84,18 +84,18 @@ contract StakingHelper {
     event LogStake(address indexed recipient, uint amount);
 
     IStaking public immutable staking;
-    IERC20 public immutable Time;
+    IERC20 public immutable Star;
 
-    constructor ( address _staking, address _Time ) {
+    constructor ( address _staking, address _Star ) {
         require( _staking != address(0) );
         staking = IStaking(_staking);
         require( _Time != address(0) );
-        Time = IERC20(_Time);
+        Star = IERC20(_Star);
     }
 
     function stake( uint _amount, address recipient ) external {
-        Time.transferFrom( msg.sender, address(this), _amount );
-        Time.approve( address(staking), _amount );
+        Star.transferFrom( msg.sender, address(this), _amount );
+        Star.approve( address(staking), _amount );
         staking.stake( _amount, recipient );
         staking.claim( recipient );
         emit LogStake(recipient, _amount);

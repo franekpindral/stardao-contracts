@@ -292,7 +292,7 @@ contract Distributor is Ownable {
     
     /* ====== VARIABLES ====== */
 
-    IERC20 public immutable TIME;
+    IERC20 public immutable STAR;
     ITreasury public immutable treasury;
     
     uint32 public immutable epochLength;
@@ -400,7 +400,7 @@ contract Distributor is Ownable {
         @return uint
      */
     function nextRewardAt( uint _rate ) public view returns ( uint ) {
-        return TIME.totalSupply().mul( _rate ).div( 1000000 );
+        return Star.totalSupply().mul( _rate ).div( 1000000 );
     }
 
     /**

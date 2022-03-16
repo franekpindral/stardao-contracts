@@ -610,30 +610,30 @@ library SafeERC20 {
     }
 }
 
-interface IMEMO is IERC20 {
+interface IDUST is IERC20 {
     function index() external view returns ( uint );
 }
 
 contract wMEMO is ERC20 {
-    using SafeERC20 for IMEMO;
+    using SafeERC20 for IDUST;
     using LowGasSafeMath for uint;
 
-    IMEMO public immutable MEMO;
+    IDUST public immutable DUST;
     event Wrap(address indexed recipient, uint256 amountMemo, uint256 amountWmemo);
     event UnWrap(address indexed recipient,uint256 amountWmemo, uint256 amountMemo);
 
-    constructor( address _MEMO ) ERC20( 'Wrapped MEMO', 'wMEMO' ) {
-        require( _MEMO != address(0) );
-        MEMO = IMEMO(_MEMO);
+    constructor( address _DUST ) ERC20( 'Wrapped DUST', 'wMEMO' ) {
+        require( _DUST != address(0) );
+        DUST = IDUST(_DUST);
     }
 
     /**
-        @notice wrap MEMO
+        @notice wrap DUST
         @param _amount uint
         @return uint
      */
     function wrap( uint _amount ) external returns ( uint ) {
-        MEMO.safeTransferFrom( msg.sender, address(this), _amount );
+        DUST.safeTransferFrom( msg.sender, address(this), _amount );
         
         uint value = MEMOTowMEMO( _amount );
         _mint( msg.sender, value );
@@ -642,7 +642,7 @@ contract wMEMO is ERC20 {
     }
 
     /**
-        @notice unwrap MEMO
+        @notice unpack DUST 
         @param _amount uint
         @return uint
      */
@@ -650,27 +650,27 @@ contract wMEMO is ERC20 {
         _burn( msg.sender, _amount );
 
         uint value = wMEMOToMEMO( _amount );
-        MEMO.safeTransfer( msg.sender, value );
+        DUST.safeTransfer( msg.sender, value );
         emit UnWrap(msg.sender, _amount, value);
         return value;
     }
 
     /**
-        @notice converts wMEMO amount to MEMO
+        @notice converts pDUST amount to DUST
         @param _amount uint
         @return uint
      */
     function wMEMOToMEMO( uint _amount ) public view returns ( uint ) {
-        return _amount.mul( MEMO.index() ).div( 10 ** decimals );
+        return _amount.mul( DUST.index() ).div( 10 ** decimals );
     }
 
     /**
-        @notice converts MEMO amount to wMEMO
+        @notice converts DUST amount to pDUST
         @param _amount uint
         @return uint
      */
     function MEMOTowMEMO( uint _amount ) public view returns ( uint ) {
-        return _amount.mul( 10 ** decimals ).div( MEMO.index() );
+        return _amount.mul( 10 ** decimals ).div( DUST.index() );
     }
 
 }
